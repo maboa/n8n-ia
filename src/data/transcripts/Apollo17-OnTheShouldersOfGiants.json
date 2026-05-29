@@ -1,0 +1,74 @@
+{
+  "identifier": "Apollo17-OnTheShouldersOfGiants",
+  "title": "Apollo 17 - On The Shoulders of Giants",
+  "mediaUrl": "https://archive.org/download/Apollo17-OnTheShouldersOfGiants/Apollo17.mp4",
+  "source": "https://archive.org/details/Apollo17-OnTheShouldersOfGiants",
+  "duration": 1708.695,
+  "language": "en",
+  "speakers": {
+    "0": {
+      "speaker": 0,
+      "label": "Narrator",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Provides overarching context, introduces astronauts, describes events, and transitions throughout the film, characteristic of a voiceover narrator."
+    },
+    "1": {
+      "speaker": 1,
+      "label": "NASA Official",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Discusses future NASA programs (Skylab, Russian mission, Shuttle) and later explains the radiometer experiment, suggesting an official or expert role. Short fragments 'The' and 'Even' are likely diarization artifacts."
+    },
+    "2": {
+      "speaker": 2,
+      "label": "Mission Control",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Primarily acts as Mission Control (detailed launch abort explanation, 'go for orbit' command, communicating with astronauts, observing EVA). However, also includes segments reflecting on Apollo-Soyuz and Apollo science, and participating in an interview-like Q&A, suggesting a merge of multiple speakers (e.g., officials, experts, interviewer/interviewee) with the primary Mission Control role."
+    },
+    "3": {
+      "speaker": 3,
+      "label": "Mission Control",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Appears to be a diarization split from Speaker 2, directly continuing Speaker 2's explanation of experiment functionality."
+    },
+    "4": {
+      "speaker": 4,
+      "label": "Astronauts",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "This speaker is a merge of all three Apollo 17 astronauts: Gene Cernan (e.g., first step on moon, final speech), Jack Schmidt (e.g., deploying ALCEP, orange soil discovery), and Ron Evans (e.g., identifying as 'America')."
+    },
+    "5": {
+      "speaker": 5,
+      "label": "NASA Official",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Discusses detailed Skylab mission plans and later reflects on the philosophical impact of spaceflight, suggesting a NASA official or expert. Possible merge of two distinct segments."
+    },
+    "6": {
+      "speaker": 6,
+      "label": "Scientist",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Expresses excitement about the orange soil discovery, stating it's 'the most exciting... since the beginning of the Apollo program,' indicating a scientific expert or mission control scientist. The first utterance is a fragment."
+    },
+    "7": {
+      "speaker": 7,
+      "label": "Official",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Explains the design and purpose of the Space Shuttle using a model, likely an official or engineer presenting future plans."
+    },
+    "8": {
+      "speaker": 8,
+      "label": "Interviewer",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Asks a direct question about an experiment ('What does that do?'), indicating an interviewer. However, also provides a reflective statement on space exploration, suggesting a possible merge with an interviewee or official."
+    }
+  },
+  "generatedAt": "2026-05-29T11:32:42.617Z"
+}
