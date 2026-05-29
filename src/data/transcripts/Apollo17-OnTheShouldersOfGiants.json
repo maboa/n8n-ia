@@ -11,64 +11,64 @@
       "label": "Narrator",
       "isRealName": false,
       "confidence": "high",
-      "evidence": "Provides overarching context, introduces astronauts, describes events, and concludes the film with a voiceover."
+      "evidence": "Provides continuous, overarching context, dates, and descriptions of events and people throughout the film, characteristic of a voiceover narrator."
     },
     "1": {
       "speaker": 1,
-      "label": "NASA Official",
+      "label": "Official",
       "isRealName": false,
       "confidence": "medium",
-      "evidence": "Discusses future NASA programs (Skylab, Apollo-Soyuz, Shuttle) and explains experiment success. Short initial utterances may be diarization errors."
+      "evidence": "Longer segments discuss ongoing and future NASA programs (Skylab, Russian mission, Shuttle) and explain experiment functions. Short fragments like 'The' and 'Even' suggest diarization errors, but the coherent parts point to an official role."
     },
     "2": {
       "speaker": 2,
-      "label": "Mission Control",
+      "label": "Official",
       "isRealName": false,
       "confidence": "high",
-      "evidence": "Provides detailed technical explanations (launch cutoff, LCEP functioning, Apollo-Soyuz purpose), communicates with astronauts ('17 Houston, you are go for orbit'), and discusses mission timelines and scientific findings. Some lines may be mixed with Speaker 4 due to diarization errors."
+      "evidence": "Provides detailed technical explanations of launch issues, gives commands ('go for orbit'), communicates with astronauts ('You're looking real good, Gene'), discusses scientific data, and reflects on the purpose of future missions (Apollo-Soyuz). This indicates a senior role in mission control or program management."
     },
     "3": {
       "speaker": 3,
-      "label": "Mission Control",
+      "label": "Official",
       "isRealName": false,
-      "confidence": "medium",
-      "evidence": "The second utterance is a direct continuation of Speaker 2's sentence, strongly suggesting a diarization error and that Speaker 3 is the same person as Speaker 2."
+      "confidence": "low",
+      "evidence": "One coherent statement explains an experiment's functionality and the need for human operation. The initial fragment 'there was a' suggests a diarization error. The coherent part aligns with an official or expert role."
     },
     "4": {
       "speaker": 4,
-      "label": "Eugene Cernan",
-      "isRealName": true,
-      "confidence": "medium",
-      "evidence": "Provides live mission commentary, including landing, first step dedication, and the 'final word from the last man on the moon' (explicitly attributed to Cernan by the Narrator). However, Speaker 4 also addresses 'Gene' (Cernan) and 'Jack' (Schmidt), indicating significant diarization errors mixing Cernan and Schmidt."
+      "label": "Astronaut",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "This speaker is clearly a merge of multiple astronauts: Gene Cernan (first step on moon, final words on moon), Jack Schmidt (interacting with Gene, orange soil discovery), and Ron Evans (during his EVA). They communicate with Houston, provide real-time commentary during landing, and describe lunar activities."
     },
     "5": {
       "speaker": 5,
-      "label": "NASA Official",
+      "label": "Official",
       "isRealName": false,
-      "confidence": "medium",
-      "evidence": "Discusses future Skylab missions and offers philosophical reflections on spaceflight. The philosophical segment might be a diarization error, potentially belonging to Speaker 4."
+      "confidence": "high",
+      "evidence": "Discusses detailed future mission schedules (Skylab duration, frequency) and offers philosophical reflections on the impact and future of spaceflight. This indicates a high-level official or visionary."
     },
     "6": {
       "speaker": 6,
-      "label": "Mission Control",
+      "label": "Scientist",
       "isRealName": false,
       "confidence": "medium",
-      "evidence": "Comments on Jack Schmidt's actions and expresses excitement about the 'orange soil' discovery, consistent with someone observing from Mission Control or the science support room."
+      "evidence": "Observes Jack Schmidt's actions and expresses strong excitement and belief in the scientific significance of the orange soil discovery ('most exciting we've all come across'). This points to a scientific expert in mission control."
     },
     "7": {
       "speaker": 7,
-      "label": "NASA Official",
+      "label": "Official",
       "isRealName": false,
       "confidence": "high",
-      "evidence": "Describes the Space Shuttle model, its design, and its economic potential, indicating an expert or official explaining a future program."
+      "evidence": "Presents and describes the Space Shuttle program, its design, and its economic and operational potential. This is characteristic of an official or engineer presenting a future project."
     },
     "8": {
       "speaker": 8,
-      "label": "Interviewer",
+      "label": "Official",
       "isRealName": false,
       "confidence": "medium",
-      "evidence": "Asks a direct question about an experiment ('What does that do?'). The initial reflective statement could be a concluding remark from the interviewer or a misattribution."
+      "evidence": "One statement is a high-level reflection on mankind's future in space. Another is a question about an experiment. While potentially two different people, both roles (visionary and technically engaged) can fall under a general 'Official' category in a NASA context."
     }
   },
-  "generatedAt": "2026-05-29T12:17:05.272Z"
+  "generatedAt": "2026-05-29T13:31:22.677Z"
 }
