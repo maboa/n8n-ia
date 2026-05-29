@@ -1,0 +1,74 @@
+{
+  "identifier": "Apollo17-OnTheShouldersOfGiants",
+  "title": "Apollo 17 - On The Shoulders of Giants",
+  "mediaUrl": "https://archive.org/download/Apollo17-OnTheShouldersOfGiants/Apollo17.mp4",
+  "source": "https://archive.org/details/Apollo17-OnTheShouldersOfGiants",
+  "duration": 1708.695,
+  "language": "en",
+  "speakers": {
+    "0": {
+      "speaker": 0,
+      "label": "Narrator",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Provides overarching context, introduces astronauts, describes events, and concludes the film with a voiceover."
+    },
+    "1": {
+      "speaker": 1,
+      "label": "NASA Official",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Discusses future NASA programs (Skylab, Apollo-Soyuz, Shuttle) and explains experiment success. Short initial utterances may be diarization errors."
+    },
+    "2": {
+      "speaker": 2,
+      "label": "Mission Control",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Provides detailed technical explanations (launch cutoff, LCEP functioning, Apollo-Soyuz purpose), communicates with astronauts ('17 Houston, you are go for orbit'), and discusses mission timelines and scientific findings. Some lines may be mixed with Speaker 4 due to diarization errors."
+    },
+    "3": {
+      "speaker": 3,
+      "label": "Mission Control",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "The second utterance is a direct continuation of Speaker 2's sentence, strongly suggesting a diarization error and that Speaker 3 is the same person as Speaker 2."
+    },
+    "4": {
+      "speaker": 4,
+      "label": "Eugene Cernan",
+      "isRealName": true,
+      "confidence": "medium",
+      "evidence": "Provides live mission commentary, including landing, first step dedication, and the 'final word from the last man on the moon' (explicitly attributed to Cernan by the Narrator). However, Speaker 4 also addresses 'Gene' (Cernan) and 'Jack' (Schmidt), indicating significant diarization errors mixing Cernan and Schmidt."
+    },
+    "5": {
+      "speaker": 5,
+      "label": "NASA Official",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Discusses future Skylab missions and offers philosophical reflections on spaceflight. The philosophical segment might be a diarization error, potentially belonging to Speaker 4."
+    },
+    "6": {
+      "speaker": 6,
+      "label": "Mission Control",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Comments on Jack Schmidt's actions and expresses excitement about the 'orange soil' discovery, consistent with someone observing from Mission Control or the science support room."
+    },
+    "7": {
+      "speaker": 7,
+      "label": "NASA Official",
+      "isRealName": false,
+      "confidence": "high",
+      "evidence": "Describes the Space Shuttle model, its design, and its economic potential, indicating an expert or official explaining a future program."
+    },
+    "8": {
+      "speaker": 8,
+      "label": "Interviewer",
+      "isRealName": false,
+      "confidence": "medium",
+      "evidence": "Asks a direct question about an experiment ('What does that do?'). The initial reflective statement could be a concluding remark from the interviewer or a misattribution."
+    }
+  },
+  "generatedAt": "2026-05-29T12:17:05.272Z"
+}
