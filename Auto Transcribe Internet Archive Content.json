@@ -1,0 +1,316 @@
+{
+  "name": "Auto Transcribe Internet Archive Content",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a23ba71c-9103-401b-9177-e688a14d0d6b",
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1696,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { identifier: 'Apollo17-OnTheShouldersOfGiants' } }];"
+      },
+      "id": "2049032d-cf04-4b23-bcac-be290be79751",
+      "name": "Identifiers",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1472,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://archive.org/metadata/{{ $json.identifier }}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "6ed298e8-978e-4579-9979-c91eae8e3abf",
+      "name": "IA Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1248,
+        80
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const meta=$json.metadata||{};const id=meta.identifier;const files=$json.files||[];const pick=files.find(f=>f.format==='h.264')||files.find(f=>(f.name||'').toLowerCase().endsWith('.mp4'))||files.find(f=>(f.name||'').toLowerCase().endsWith('.ogv'))||files.find(f=>(f.name||'').toLowerCase().endsWith('.m4v'))||files.find(f=>f.format==='MPEG4');if(!pick){throw new Error('No media file for '+id);}return {json:{identifier:id,title:meta.title||id,file:pick.name,format:pick.format,length:pick.length||null,mediaUrl:'https://archive.org/download/'+id+'/'+encodeURIComponent(pick.name)}};"
+      },
+      "id": "3f58b16c-d9e2-4ff3-b95f-0c0b76695fbc",
+      "name": "Pick Media File",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1024,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepgram.com/v1/listen?model=nova-3&smart_format=true&punctuate=true&paragraphs=true&diarize=true",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ url: $json.mediaUrl }) }}",
+        "options": {
+          "timeout": 300000
+        }
+      },
+      "id": "020f5f0a-14f3-4ae2-bb8c-9a176ca2fde2",
+      "name": "Transcription via Deepgram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -816,
+        80
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HUAXdW8De0w6iL3b",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const dg = $json;\nconst meta = $('IA Metadata').item.json.metadata || {};\nconst picked = $('Pick Media File').item.json;\n\nconst alt = dg?.results?.channels?.[0]?.alternatives?.[0];\nconst words = alt?.words || [];\nconst wordText = (w) => (w.punctuated_word || w.word || '');\n\nconst turns = [];\nlet cur = null;\nfor (const w of words) {\n  const spk = (w.speaker === undefined ? 0 : w.speaker);\n  if (!cur || cur.speaker !== spk) { cur = { speaker: spk, text: '' }; turns.push(cur); }\n  cur.text += wordText(w) + ' ';\n}\nconst turnsText = turns.map(t => `[Speaker ${t.speaker}]: ${t.text.trim()}`).join('\\n');\nconst speakerNumbers = [...new Set(words.map(w => (w.speaker === undefined ? 0 : w.speaker)))].sort((a, b) => a - b);\n\nlet description = meta.description;\nif (Array.isArray(description)) description = description.join(' ');\ndescription = String(description || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 1500);\n\nconst title = picked.title || meta.title || picked.identifier;\n\nreturn {\n  json: {\n    identifier: picked.identifier,\n    title,\n    mediaUrl: picked.mediaUrl,\n    description: description || '(none provided)',\n    speakerNumbers,\n    turnsText,\n    // carried through for Assemble:\n    words,\n    duration: dg?.metadata?.duration ?? null,\n    language: dg?.results?.channels?.[0]?.detected_language || 'en',\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -608,
+        80
+      ],
+      "id": "2d174867-7dca-4933-8d6a-63025bdc48d2",
+      "name": "Speaker ID Prep"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are analysing a diarized transcript from an archival film, to label each speaker.\n\nFILM\nTitle: {{ $json.title }}\nDescription: {{ $json.description }}\n\nTRANSCRIPT (speaker numbers come from automatic diarization and may be imperfect)\n{{ $json.turnsText }}\n\nTASK\nFor each speaker number, infer the most likely identity or role.\nRules:\n- If a speaker is narrating (voiceover, main narration), label them exactly \"Narrator\" — never append a name or qualifier.\n- Otherwise, use a real person's NAME only if the transcript or description explicitly supports it (e.g. the speaker introduces themselves by name).\n- Otherwise, use a descriptive ROLE such as \"Interviewer\", \"Interviewee\", \"Reporter\", \"Official\", \"Soldier\", \"Witness\".\n- If you cannot determine even a role, use exactly \"Unknown speaker\".\n- All labels must be under 20 characters. Be concise.\n- Do NOT invent or guess names. When unsure, prefer \"Unknown speaker\" with low confidence.\n- Diarization may split one person across numbers or merge two people; note this in evidence if you suspect it.\n\nSpeaker numbers to label: {{ $json.speakerNumbers.join(', ') }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -304,
+        96
+      ],
+      "id": "a9c38de6-94fa-44f1-ae09-15ce7df2d7d5",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -432,
+        288
+      ],
+      "id": "45ec1db8-9b89-45af-88c0-d238931710d4",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "aV8NLrTUpfAp7icl",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"speakers\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"speaker\": { \"type\": \"integer\", \"description\": \"Speaker number from the diarized transcript\" },\n          \"label\": { \"type\": \"string\", \"description\": \"Inferred role or name\" },\n          \"isRealName\": { \"type\": \"boolean\", \"description\": \"True only if label is a real person's name explicitly supported by the text\" },\n          \"confidence\": { \"type\": \"string\", \"enum\": [\"high\", \"medium\", \"low\"] },\n          \"evidence\": { \"type\": \"string\", \"description\": \"Short justification, mention any diarization concerns\" }\n        },\n        \"required\": [\"speaker\", \"label\", \"isRealName\", \"confidence\", \"evidence\"]\n      }\n    }\n  },\n  \"required\": [\"speakers\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        288
+      ],
+      "id": "9eb23fe8-c561-4277-83fc-a2b40adcbefe",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "f356c7b0-6ca1-442d-a1c2-9e490d0df34c",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// ---- inputs (all from the merged item) ----\nconst identifier = $json.identifier;\nconst title = $json.title || identifier;\nconst mediaUrl = $json.mediaUrl;\nconst words = $json.words || [];\nconst duration = $json.duration ?? null;\nconst language = $json.language || 'en';\n\n// ---- speaker labels from the Structured Output Parser ----\nlet speakers = {};\nconst parsed = $json.output ?? {};\nconst arr = parsed.speakers || (Array.isArray(parsed) ? parsed : []);\nfor (const e of arr) {\n  if (e && e.speaker !== undefined) speakers[e.speaker] = e;\n}\n\n// ---- normalise labels: Narrator / Unknown speaker N / ≤20 chars ----\n{\n  const keys = Object.keys(speakers).map(Number).sort((a, b) => a - b);\n  let unknownCount = 0;\n  for (const k of keys) {\n    const s = speakers[k];\n    if (!s?.label) continue;\n    let lbl = String(s.label).trim();\n    if (/narrator|voice[- ]?over/i.test(lbl)) {\n      lbl = 'Narrator';\n    } else if (/^(unknown|unidentified|unclear)/i.test(lbl)) {\n      unknownCount++;\n      lbl = `Unknown speaker ${unknownCount}`;\n    } else if (lbl.length > 20) {\n      lbl = lbl.slice(0, 17) + '…';\n    }\n    speakers[k] = { ...s, label: lbl };\n  }\n}\n\nconst labelFor = (n) => (speakers[n] && speakers[n].label) ? speakers[n].label : `Speaker ${n}`;\n\n// ---- sentence-anchor speakers (smooth diarization at sentence boundaries) ----\nconst wordText = (w) => (w.punctuated_word || w.word || '');\nfunction smoothSpeakers(arr) {\n  if (!arr.length) return;\n  const ends = (w) => {\n    const t = wordText(w);\n    const lc = t.charAt(t.length - 1);\n    return lc === '.' || lc === '?' || lc === '!';\n  };\n  let start = 0;\n  for (let i = 0; i < arr.length; i++) {\n    if (ends(arr[i]) || i === arr.length - 1) {\n      const tally = {};\n      for (let j = start; j <= i; j++) {\n        const k = arr[j].speaker ?? 0;\n        tally[k] = (tally[k] || 0) + 1;\n      }\n      let winner = null, max = -1;\n      for (const k in tally) if (tally[k] > max) { max = tally[k]; winner = +k; }\n      for (let j = start; j <= i; j++) arr[j].speaker = winner;\n      start = i + 1;\n    }\n  }\n}\nsmoothSpeakers(words);\n\n// ---- build Hyperaudio transcript ----\nconst maxWordsInPara = 100;\nconst significantGapInSeconds = 4.0;\nconst ms = (s) => Math.round(s * 1000);\nconst esc = (s) => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\nconst showDiarization = words.some((w) => w.speaker !== undefined);\n\nlet ht = `<article>\\n <section data-media-src=\"${esc(mediaUrl)}\">\\n  <p>\\n   `;\nlet prevEnd = 0, inPara = 0;\nwords.forEach((el, i) => {\n  inPara++;\n  if ((prevEnd !== 0 && (el.start - prevEnd) > significantGapInSeconds) || inPara > maxWordsInPara) {\n    const pw = wordText(words[i - 1]);\n    const lc = pw.charAt(pw.length - 1);\n    if (lc === '.' || lc === '?' || lc === '!') { ht += \"\\n  </p>\\n  <p>\\n   \"; inPara = 0; }\n  }\n  if (showDiarization && i > 0 && el.speaker !== words[i - 1].speaker) { ht += \"\\n  </p>\\n  <p>\\n   \"; inPara = 0; }\n  if (showDiarization && (i === 0 || el.speaker !== words[i - 1].speaker)) {\n    ht += `<span class=\"speaker\" data-m='${ms(el.start)}' data-d='0'>${esc(labelFor(el.speaker))} </span>\\n   `;\n  }\n  ht += `<span data-m='${ms(el.start)}' data-d='${ms(el.end - el.start)}'>${esc(wordText(el))} </span>\\n   `;\n  prevEnd = el.end;\n});\nht += \"\\n </p> \\n </section>\\n</article>\\n\";\nht = ht.replace(/<p>\\s*<\\/p>\\s*/g, '');\n\n// ---- metadata JSON ----\nconst metadata = {\n  identifier, title, mediaUrl,\n  source: `https://archive.org/details/${identifier}`,\n  duration, language, speakers,\n  generatedAt: new Date().toISOString(),\n};\n\nreturn {\n  json: {\n    identifier,\n    files: [\n      {\n        path: `src/data/transcripts/${identifier}.html`,\n        content: ht,\n        kind: 'html',\n        identifier,\n      },\n      {\n        path: `src/data/transcripts/${identifier}.json`,\n        content: JSON.stringify(metadata, null, 2),\n        kind: 'json',\n        identifier,\n      },\n    ],\n  },\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        96
+      ],
+      "id": "68ffca8c-26fb-44e2-8298-30dc31d9e98f",
+      "name": "Assemble"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Identifiers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Identifiers": {
+      "main": [
+        [
+          {
+            "node": "IA Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA Metadata": {
+      "main": [
+        [
+          {
+            "node": "Pick Media File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Media File": {
+      "main": [
+        [
+          {
+            "node": "Transcription via Deepgram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcription via Deepgram": {
+      "main": [
+        [
+          {
+            "node": "Speaker ID Prep",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speaker ID Prep": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Assemble",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "716081e9-9259-436a-945c-f3d2201f18ab",
+  "meta": {
+    "instanceId": "70a5bd2f842d7de832fcc6b9ae03e258b50c3461c6e8abe2b2d59ef71fd549a1"
+  },
+  "id": "1wCithiibfvQAVi9",
+  "tags": []
+}
